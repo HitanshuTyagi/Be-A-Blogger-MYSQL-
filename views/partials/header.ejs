@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Be A Blogger</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    /* --- Modern Theme Colors --- */
+  :root {
+  --primary-gradient: linear-gradient(135deg, #6a11cb, #2575fc);
+  --primary-color: #2575fc;
+  --accent-color: #ffb300;
+  --light-color: #ffffff;
+  --dark-color: #1a1a2e;
+  --logo-color: #ffb300; /* Added specific variable for logo color */
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  --input-bg: #f1f3f6;   /* light search background */
+  --input-text: #333;    /* dark text for light mode */
+}
+
+/* Dark theme overrides */
+body.dark {
+  --input-bg: #2b2b3c;   /* dark search background */
+  --input-text: #e4e4e7; /* light text for dark mode */
+}
+
+
+    /* --- Header --- */
+    .site-header {
+      background: var(--primary-gradient);
+      color: var(--light-color);
+      padding: 15px 25px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .site-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    /* --- Logo --- */
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--logo-color);
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .logo:hover {
+      color: #fff;
+    }
+
+    /* --- Navigation Links (New Post & Dashboard) --- */
+    nav a.nav-link {
+      color: var(--logo-color);
+      text-decoration: none;
+      font-size: 15px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 6px;
+      transition: 0.3s;
+      font-weight: bold;
+    }
+
+    nav a.nav-link:hover {
+      background: rgba(255, 179, 0, 0.2); /* Light overlay with logo color tint */
+      color: #fff;
+    }
+
+    /* --- Search bar --- */
+.search {
+  display: flex;
+  flex: 1;
+  max-width: 420px;
+  margin: 10px 20px;
+  box-shadow: var(--shadow);
+  border-radius: 50px;
+  overflow: hidden;
+  background: var(--input-bg);
+}
+
+.search input {
+  flex: 1;
+  padding: 12px 18px;
+  border: none;
+  font-size: 15px;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--input-text); /* ✅ Now it uses the right text color per theme */
+}
+
+
+    .search button {
+      padding: 0 22px;
+      border: none;
+      background: var(--accent-color);
+      color: var(--dark-color);
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      border-radius: 0;
+    }
+
+    .search button:hover {
+      background: #ffc947;
+    }
+
+    /* --- Navigation --- */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    nav a, nav button, nav form button {
+      color: var(--light-color);
+      text-decoration: none;
+      font-size: 15px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    nav button, nav form button {
+      background: var(--accent-color);
+      color: var(--dark-color);
+      font-weight: bold;
+      box-shadow: var(--shadow);
+    }
+
+    nav button:hover, nav form button:hover {
+      background: #ffc947;
+    }
+    /* Style only Login and Register links */
+    nav a.login-register {
+      background: var(--accent-color);
+      color: var(--dark-color);
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+      transition: 0.3s;
+    }
+
+    nav a.login-register:hover {
+      background: #ffc947;
+    }
+
+
+    /* --- Flash Messages --- */
+    .flash {
+      padding: 12px 18px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.4s ease;
+    }
+    .flash.success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 6px solid #28a745;
+    }
+    .flash.error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 6px solid #dc3545;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .site-header {
+        padding: 10px 15px;
+      }
+      .site-header .container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+      .logo {
+        font-size: 1.5rem;
+      }
+      nav {
+        margin-top: 5px;
+        justify-content: center;
+        width: 100%;
+      }
+      .search {
+        width: 100%;
+        margin: 5px 0;
+        max-width: none;
+      }
+      .search input {
+        padding: 10px 15px;
+        width: 100%;
+      }
+      nav a.nav-link, nav a.login-register, nav button, nav form button {
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Light theme (default) */
+body:not(.dark) .search input {
+  color: #333;   /* dark text */
+}
+
+/* Dark theme */
+body.dark .search input {
+  color: #e4e4e7;   /* light text */
+}
+
+  </style>
+</head>
+
+<body>
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">Be A Blogger</a>
+
+    <form action="/" method="get" class="search">
+      <input type="text" name="q" placeholder="Search posts..." value="<%= typeof q !== 'undefined' ? q : '' %>"/>
+      <button type="submit">Search</button>
+    </form>
+
+    <nav>
+      <% if (!currentUser) { %>
+      <a href="/auth/login" class="login-register">Login</a>
+      <a href="/auth/register" class="login-register">Register</a>
+    <% } else { %>
+      <a href="/posts/new" class="nav-link">New Post</a>
+      <% if (currentUser.role === 'admin') { %>
+        <a href="/admin" class="nav-link" style="color: #ff4757;">Admin Panel</a>
+      <% } %>
+      <a href="/users/profile" class="nav-link">Dashboard</a>
+      <form action="/auth/logout" method="post" style="display:inline">
+        <button type="submit">Logout</button>
+      </form>
+    <% } %>
+      <button id="themeToggle">🌙</button>
+    </nav>
+  </div>
+</header>
+<script>
+  const toggleBtn = document.getElementById("themeToggle");
+  toggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+  });
+</script>
+
+</body>
+<main class="container">
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error %></div>
+  <% } %>

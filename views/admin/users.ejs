@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2>Manage Users</h2>
+
+  <div style="margin-top: 20px; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; background: var(--light-color); box-shadow: var(--shadow); border-radius: 8px; overflow: hidden;" class="user-table">
+      <thead style="background: var(--primary-color); color: #fff;">
+        <tr>
+          <th style="padding: 12px; text-align: left;">ID</th>
+          <th style="padding: 12px; text-align: left;">Username</th>
+          <th style="padding: 12px; text-align: left;">Email</th>
+          <th style="padding: 12px; text-align: left;">Role</th>
+          <th style="padding: 12px; text-align: center;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(user => { %>
+          <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px;"><%= user.id %></td>
+            <td style="padding: 12px;"><%= user.username %></td>
+            <td style="padding: 12px;"><%= user.email %></td>
+            <td style="padding: 12px;">
+              <span style="background: <%= user.role === 'admin' ? '#ff4757' : '#2ed573' %>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">
+                <%= user.role.toUpperCase() %>
+              </span>
+            </td>
+            <td style="padding: 12px; text-align: center; display: flex; gap: 8px; justify-content: center;">
+              
+              <% if (user.role !== 'admin') { %>
+                <form action="/admin/users/<%= user.id %>/make-admin" method="POST" style="margin: 0;">
+                  <button type="submit" style="background: var(--accent-color); border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--dark-color);">Make Admin</button>
+                </form>
+              <% } %>
+
+              <% if (user.id !== currentUser.id) { %>
+                <form action="/admin/users/<%= user.id %>/delete" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this user? Their posts and comments will also be deleted.');">
+                  <button type="submit" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Delete User</button>
+                </form>
+              <% } %>
+
+            </td>
+          </tr>
+        <% }) %>
+        <% if(users.length === 0) { %>
+          <tr><td colspan="5" style="padding: 15px; text-align: center;">No users found.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  body.dark .user-table {
+    background: #2b2b3c !important;
+    color: #e4e4e7;
+  }
+  body.dark .user-table tr {
+    border-bottom: 1px solid #3f3f5a;
+  }
+  body.dark .user-table thead {
+    background: #1e1e2d;
+  }
+</style>
+
+<%- include('../partials/footer') %>

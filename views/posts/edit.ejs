@@ -1,0 +1,889 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  <div class="edit-post-card">
+    <div class="post-header">
+      <div class="header-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
+          <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
+        </svg>
+      </div>
+      <h2>Edit Post</h2>
+      <p class="subtitle">Refine and perfect your content</p>
+    </div>
+
+    <form action="/posts/<%= post.id %>?_method=PUT" method="post" enctype="multipart/form-data" class="edit-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="input-header">
+            <label>Title</label>
+            <span class="char-counter"><%= post.title.length %>/120</span>
+          </div>
+          <input name="title" value="<%= post.title %>" required class="title-input" />
+          <div class="input-underline"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Featured Image</label>
+          <div class="file-upload-area" id="fileUploadArea">
+            <% if (post.image) { %>
+              <div class="current-image-preview">
+                <img src="<%= post.image %>" alt="Current post image" id="currentImagePreview">
+                <div class="image-overlay">
+                  <span>Current Image</span>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="upload-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M5 11.1l2-2 5.5 5.5 3.5-3.5 3 3V5H5v6.1zm0 2.829V19h3.1l2.986-2.985L7 11.929l-2 2zM10.929 19H19v-2.071l-3-3L10.929 19zM4 3h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zm11.5 7a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+                </svg>
+                <p>Drag & drop new image or <span class="browse-text">browse</span></p>
+                <span class="file-types">JPG, PNG, GIF up to 5MB</span>
+              </div>
+            <% } %>
+            <input type="file" name="image" accept="image/*" id="imageUpload" class="file-input" />
+          </div>
+          <div class="file-preview" id="filePreview"></div>
+          <% if (post.image) { %>
+            <div class="image-actions">
+              <label class="checkbox-label">
+                <input type="checkbox" name="removeImage" id="removeImage">
+                <span class="checkmark"></span>
+                Remove current image
+              </label>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <div class="select-wrapper">
+            <select name="category">
+              <option value="" disabled <%= !post.category ? 'selected' : '' %>>Select a category</option>
+              <option value="Technology" <%= post.category === 'Technology' ? 'selected' : '' %>>Technology</option>
+              <option value="Lifestyle" <%= post.category === 'Lifestyle' ? 'selected' : '' %>>Lifestyle</option>
+              <option value="Travel" <%= post.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+              <option value="Food" <%= post.category === 'Food' ? 'selected' : '' %>>Food</option>
+              <option value="Health" <%= post.category === 'Health' ? 'selected' : '' %>>Health</option>
+              <option value="Business" <%= post.category === 'Business' ? 'selected' : '' %>>Business</option>
+              <option value="Entertainment" <%= post.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+              <option value="Other" <%= post.category === 'Other' ? 'selected' : '' %>>Other</option>
+            </select>
+            <div class="select-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 15.0006L7.75732 10.758L9.17154 9.34375L12 12.1722L14.8284 9.34375L16.2426 10.758L12 15.0006Z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tags</label>
+          <div class="tags-input-container">
+            <input name="tags" value="<%= post.tags.join(', ') %>" placeholder="Type a tag and press Enter" class="tags-input" />
+            <div class="tags-hint">Separate with commas or press Enter</div>
+          </div>
+          <div class="tags-preview">
+            <% post.tags.forEach(tag => { %>
+              <div class="tag">
+                <%= tag %>
+                <span class="tag-remove">×</span>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <div class="input-header">
+            <label>Content</label>
+            <span class="char-counter"><%= post.content.length %>/5000</span>
+          </div>
+          <textarea name="content" required class="content-textarea"><%= post.content %></textarea>
+          <div class="text-underline"></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/posts/<%= post.slug || post.id %>" class="btn btn-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+          </svg>
+          Cancel
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v11.25c0 1.036.84 1.875 1.875 1.875h9.75c1.036 0 1.875-.84 1.875-1.875V9.75A1.875 1.875 0 0015.375 7.5h-1.5a1.875 1.875 0 01-1.875-1.875v-1.5A1.875 1.875 0 009.375 3h-6zm9.75 15h-9.5a.375.375 0 01-.375-.375V4.875c0-.207.168-.375.375-.375h6c.207 0 .375.168.375.375V5.25c0 1.036.84 1.875 1.875 1.875h1.5c.207 0 .375.168.375.375v9.75a.375.375 0 01-.375.375zm4.5-11.25a1.125 1.125 0 00-1.125 1.125v9.75c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V7.875c0-.621-.504-1.125-1.125-1.125h-2.25z" />
+          </svg>
+          Update Post
+        </button>
+      </div>
+    </form>
+
+    <div class="delete-section">
+      <h3>Danger Zone</h3>
+      <p>Once you delete a post, there is no going back. Please be certain.</p>
+      <form action="/posts/<%= post.id %>?_method=DELETE" method="post" id="deleteForm">
+        <button type="button" class="btn btn-danger" id="deleteButton">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v11.25c0 1.036.84 1.875 1.875 1.875h9.75c1.036 0 1.875-.84 1.875-1.875V9.75A1.875 1.875 0 0015.375 7.5h-1.5a1.875 1.875 0 01-1.875-1.875v-1.5A1.875 1.875 0 009.375 3h-6z" />
+            <path d="M16.5 6h.75a1.875 1.875 0 011.875 1.875V18.75A1.875 1.875 0 0118.375 21H7.625A1.875 1.875 0 015.75 19.125V7.875A1.875 1.875 0 017.625 6h.75m3.75 9h3.75a.75.75 0 000-1.5h-3.75a.75.75 0 000 1.5zm0 3h3.75a.75.75 0 000-1.5h-3.75a.75.75 0 000 1.5z" />
+          </svg>
+          Delete Post
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+
+<style>
+  /* --- Modern Theme Colors --- */
+  :root {
+    --primary-gradient: linear-gradient(135deg, #6a11cb, #2575fc);
+    --primary-color: #2575fc;
+    --accent-color: #ffb300;
+    --light-color: #ffffff;
+    --dark-color: #1a1a2e;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --border-color: #e2e8f0;
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --input-bg: #f1f3f6;
+    --input-text: #333;
+    --danger: #ef4444;
+    --danger-dark: #dc2626;
+  }
+
+  /* Dark theme overrides */
+  body.dark {
+    --card-bg: #1a1a2e;
+    --text-color: #e4e4e7;
+    --border-color: #2b2b3c;
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --input-bg: #2b2b3c;
+    --input-text: #e4e4e7;
+    background: #1e3a8a;
+  }
+
+  /* Global styles */
+  * {
+    box-sizing: border-box;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e3a8a;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .edit-post-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  .post-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .post-header::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary-gradient);
+    border-radius: 2px;
+  }
+
+  .header-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .header-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .post-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+  }
+
+  .subtitle {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+  }
+
+  .form-group {
+    position: relative;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 14px;
+  }
+
+  .input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .char-counter {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+
+  .edit-form input,
+  .edit-form textarea,
+  .edit-form select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s;
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-family: inherit;
+  }
+
+  .title-input {
+    font-size: 18px !important;
+    font-weight: 600;
+  }
+
+  .edit-form input:focus,
+  .edit-form textarea:focus,
+  .edit-form select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(37, 117, 252, 0.3);
+  }
+
+  /* File upload */
+  .file-upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    background: var(--input-bg);
+    position: relative;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .file-upload-area:hover {
+    border-color: var(--primary-color);
+  }
+
+  .current-image-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .current-image-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+
+  .upload-placeholder svg {
+    width: 48px;
+    height: 48px;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+  }
+
+  .upload-placeholder p {
+    margin: 0 0 8px;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+
+  .browse-text {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .file-types {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.8;
+  }
+
+  .file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-preview {
+    margin-top: 15px;
+    display: none;
+  }
+
+  .file-preview img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .image-actions {
+    margin-top: 15px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-color);
+    opacity: 0.8;
+  }
+
+  .checkbox-label input {
+    display: none;
+  }
+
+  .checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    margin-right: 8px;
+    position: relative;
+    transition: 0.3s;
+  }
+
+  .checkbox-label input:checked ~ .checkmark {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .checkbox-label input:checked ~ .checkmark::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 12px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .select-wrapper {
+    position: relative;
+  }
+
+  .select-wrapper select {
+    appearance: none;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .select-arrow svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+
+  .tags-input-container {
+    position: relative;
+  }
+
+  .tags-input {
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    width: 100%;
+  }
+
+  .tags-hint {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-top: 5px;
+  }
+
+  .tags-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .tag {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .tag-remove {
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 4px;
+  }
+
+  .content-textarea {
+    min-height: 250px;
+    resize: vertical;
+    line-height: 1.7;
+    background: var(--input-bg);
+    color: var(--input-text);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    border: none;
+    text-decoration: none;
+    font-size: 16px;
+  }
+
+  .btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 6px 18px rgba(37, 117, 252, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    box-shadow: 0 6px 20px rgba(37, 117, 252, 0.6);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+  }
+
+  .btn-secondary:hover {
+    background: var(--input-bg);
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: var(--danger-dark);
+  }
+
+  .btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .delete-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .delete-section h3 {
+    color: var(--danger);
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  .delete-section p {
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    z-index: 100;
+    transition: 0.3s;
+  }
+
+  .theme-toggle:hover {
+    transform: rotate(30deg);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 15px;
+    }
+    
+    .edit-post-card {
+      padding: 25px;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Character counters
+    const titleInput = document.querySelector('.title-input');
+    const contentTextarea = document.querySelector('.content-textarea');
+    const titleCounter = document.querySelectorAll('.char-counter')[0];
+    const contentCounter = document.querySelectorAll('.char-counter')[1];
+    
+    if (titleInput && titleCounter) {
+      titleInput.addEventListener('input', function() {
+        titleCounter.textContent = `${this.value.length}/120`;
+      });
+    }
+    
+    if (contentTextarea && contentCounter) {
+      contentTextarea.addEventListener('input', function() {
+        contentCounter.textContent = `${this.value.length}/5000`;
+      });
+    }
+    
+    // File upload preview
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('imageUpload');
+    const filePreview = document.getElementById('filePreview');
+    const currentImagePreview = document.getElementById('currentImagePreview');
+    const removeImageCheckbox = document.getElementById('removeImage');
+    
+    if (fileUploadArea && fileInput) {
+      // Drag and drop
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        fileUploadArea.style.borderColor = 'var(--primary-color)';
+        fileUploadArea.style.backgroundColor = 'rgba(37, 117, 252, 0.1)';
+      }
+      
+      function unhighlight() {
+        fileUploadArea.style.borderColor = 'var(--border-color)';
+        fileUploadArea.style.backgroundColor = 'var(--input-bg)';
+      }
+      
+      fileUploadArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        handleFiles(files);
+      }
+      
+      fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+      });
+      
+      function handleFiles(files) {
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.type.match('image.*')) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+              // Hide current image preview if exists
+              if (currentImagePreview) {
+                currentImagePreview.style.display = 'none';
+                document.querySelector('.image-overlay').style.display = 'none';
+              }
+              
+              filePreview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <p>${file.name} (${Math.round(file.size / 1024)} KB)</p>
+              `;
+              filePreview.style.display = 'block';
+              
+              // If remove image checkbox is checked, uncheck it
+              if (removeImageCheckbox && removeImageCheckbox.checked) {
+                removeImageCheckbox.checked = false;
+              }
+            }
+            
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    }
+    
+    // Tags input
+    const tagsInput = document.querySelector('.tags-input');
+    const tagsPreview = document.querySelector('.tags-preview');
+    
+    if (tagsInput && tagsPreview) {
+      // Initialize tags from existing value
+      updateTagsPreview();
+      
+      tagsInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value.trim() !== '') {
+          e.preventDefault();
+          addTag(this.value.trim());
+          this.value = '';
+          updateTagsInput();
+        }
+      });
+      
+      tagsInput.addEventListener('blur', function() {
+        if (this.value.trim() !== '') {
+          addTag(this.value.trim());
+          this.value = '';
+          updateTagsInput();
+        }
+      });
+      
+      // Add remove functionality to existing tags
+      document.querySelectorAll('.tag-remove').forEach(removeBtn => {
+        removeBtn.addEventListener('click', function() {
+          this.parentElement.remove();
+          updateTagsInput();
+        });
+      });
+    }
+    
+    function addTag(tagText) {
+      const tagElement = document.createElement('div');
+      tagElement.className = 'tag';
+      tagElement.innerHTML = `
+        ${tagText}
+        <span class="tag-remove">×</span>
+      `;
+      
+      tagsPreview.appendChild(tagElement);
+      
+      // Add remove functionality
+      tagElement.querySelector('.tag-remove').addEventListener('click', function() {
+        tagElement.remove();
+        updateTagsInput();
+      });
+      
+      updateTagsInput();
+    }
+    
+    function updateTagsInput() {
+      const tags = Array.from(tagsPreview.querySelectorAll('.tag'))
+        .map(tag => tag.textContent.replace('×', '').trim());
+      tagsInput.value = tags.join(', ');
+    }
+    
+    function updateTagsPreview() {
+      const tags = tagsInput.value.split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+      
+      tagsPreview.innerHTML = '';
+      
+      tags.forEach(tag => {
+        addTag(tag);
+      });
+    }
+    
+    // Delete confirmation
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    if (deleteButton && deleteForm) {
+      deleteButton.addEventListener('click', function() {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            deleteForm.submit();
+          }
+        });
+      });
+    }
+    
+    // Theme toggle functionality
+    const themeToggle = document.createElement('button');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.innerHTML = '🌙';
+    themeToggle.setAttribute('aria-label', 'Toggle dark mode');
+    document.body.appendChild(themeToggle);
+    
+    // Check for saved theme preference or respect OS preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Set initial theme
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      document.body.classList.add('dark');
+      themeToggle.textContent = '☀️';
+    } else {
+      document.body.classList.remove('dark');
+      themeToggle.textContent = '🌙';
+    }
+    
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      
+      // Save preference to localStorage
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  });
+</script>
+
+<!-- SweetAlert for beautiful confirmation dialogs -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

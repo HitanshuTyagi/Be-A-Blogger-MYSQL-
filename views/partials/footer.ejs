@@ -1,0 +1,98 @@
+</main>
+
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-left">
+      © <%= new Date().getFullYear() %> <span class="brand">MyBlog</span>. All rights reserved.
+    </div>
+    <div class="footer-right">
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <a href="/privacy">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: #fff;
+    padding: 18px 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 -3px 12px rgba(0,0,0,0.15);
+    position: relative;
+    bottom: 0;
+    width: 100%;
+  }
+
+  /* Stretch full width (removed max-width) */
+  .footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;         /* full width */
+    max-width: none;     /* no restriction */
+    margin: 0;           /* flush with edges */
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .footer-left {
+    font-size: 15px;
+    opacity: 0.9;
+  }
+
+  .footer-left .brand {
+    font-weight: 700;
+    color: #ffd54f;
+    letter-spacing: 0.5px;
+  }
+
+  .footer-right {
+    display: flex;
+    color: #ffd54f;
+    gap: 20px;
+  }
+
+  .footer-right a {
+    color: #ffd54f;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: color 0.3s, transform 0.2s;
+  }
+
+  .footer-right a:hover {
+    color: #ffd54f;
+    transform: translateY(-2px);
+  }
+
+  /* Mobile friendly */
+  @media (max-width: 700px) {
+    .footer-container {
+      flex-direction: column;
+      text-align: center;
+      gap: 8px;
+    }
+    .footer-right {
+      gap: 15px;
+    }
+  }
+</style>
+
+<script>
+  // Theme toggle - save in localStorage
+  const btn = document.getElementById('themeToggle');
+  const current = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', current);
+
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    });
+  }
+</script>
+</body>
+</html>

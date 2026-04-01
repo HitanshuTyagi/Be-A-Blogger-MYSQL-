@@ -16,6 +16,9 @@ router.get('/users', adminController.getUsers);
 router.post('/users/:id/make-admin', adminController.makeAdmin);
 
 // Delete user
-router.post('/users/:id/delete', adminController.deleteUser);
+router.delete('/users/:id', adminController.deleteUser);
+
+// Manage Posts
+router.get('/posts', adminController.getPosts);
 
 module.exports = router;

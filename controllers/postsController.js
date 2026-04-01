@@ -3,60 +3,56 @@ const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
 
-exports.renderNew = (req, res) => {
-  res.render('posts/new');
-};
-
 exports.createPost = async (req, res) => {
   try {
     const { title, content, tags, category } = req.body;
     const post = new Post({
       title,
       content,
-      authorId: req.session.user.id,
+      authorId: req.user.id,
       tags: tags ? tags.split(',').map(t => t.trim()) : [],
       category,
       image: req.file ? '/uploads/' + req.file.filename : null
     });
     await post.save();
-    req.flash('success', 'Post created');
-    res.redirect(`/posts/${post.slug}`);
+    res.json({ post, message: 'Post created' });
   } catch (e) {
-    req.flash('error', e.message);
-    res.redirect('/posts/new');
+    res.status(400).json({ error: e.message });
   }
 };
 
 exports.showPost = async (req, res) => {
   try {
-    const post = await Post.findOne({ where: { slug: req.params.slug }, include: [{ model: User, as: 'author' }] });
+    const post = await Post.findOne({
+      where: { slug: req.params.slug },
+      include: [{ model: User, as: 'author', attributes: ['id', 'username', 'profileImage'] }]
+    });
     if (!post) {
-      req.flash('error', 'Post not found');
-      return res.redirect('/');
+      return res.status(404).json({ error: 'Post not found' });
     }
-    const comments = await Comment.findAll({ where: { postId: post.id }, include: [{ model: User, as: 'author' }], order: [['createdAt', 'DESC']] });
-    res.render('posts/show', { post, comments });
+    const comments = await Comment.findAll({
+      where: { postId: post.id },
+      include: [{ model: User, as: 'author', attributes: ['id', 'username'] }],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ post, comments });
   } catch (error) {
-    req.flash('error', 'Error loading post');
-    res.redirect('/');
+    res.status(500).json({ error: 'Error loading post' });
   }
 };
 
-exports.renderEdit = async (req, res) => {
+exports.getPostForEdit = async (req, res) => {
   try {
     const post = await Post.findByPk(req.params.id);
     if (!post) {
-      req.flash('error', 'Post not found');
-      return res.redirect('/');
+      return res.status(404).json({ error: 'Post not found' });
     }
-    if (post.authorId != req.session.user.id) {
-      req.flash('error', 'Unauthorized');
-      return res.redirect('/');
+    if (post.authorId != req.user.id) {
+      return res.status(403).json({ error: 'Unauthorized' });
     }
-    res.render('posts/edit', { post });
+    res.json({ post });
   } catch (error) {
-    req.flash('error', 'Error loading post');
-    res.redirect('/');
+    res.status(500).json({ error: 'Error loading post' });
   }
 };
 
@@ -64,33 +60,28 @@ exports.updatePost = async (req, res) => {
   try {
     const post = await Post.findByPk(req.params.id);
     if (!post) {
-      req.flash('error', 'Post not found');
-      return res.redirect('/');
+      return res.status(404).json({ error: 'Post not found' });
     }
-    if (post.authorId != req.session.user.id) {
-      req.flash('error', 'Unauthorized');
-      return res.redirect('/');
+    if (post.authorId != req.user.id) {
+      return res.status(403).json({ error: 'Unauthorized' });
     }
-    
+
     const { title, content, tags, category, removeImage } = req.body;
     post.title = title;
     post.content = content;
     post.tags = tags ? tags.split(',').map(t => t.trim()) : [];
     post.category = category;
-    
-    // Handle image updates
+
     if (req.file) {
       post.image = '/uploads/' + req.file.filename;
-    } else if (removeImage === 'on') {
+    } else if (removeImage === 'true') {
       post.image = null;
     }
-    
+
     await post.save();
-    req.flash('success', 'Post updated successfully');
-    res.redirect(`/posts/${post.slug}`);
+    res.json({ post, message: 'Post updated successfully' });
   } catch (error) {
-    req.flash('error', 'Error updating post');
-    res.redirect('back');
+    res.status(500).json({ error: 'Error updating post' });
   }
 };
 
@@ -98,28 +89,20 @@ exports.deletePost = async (req, res) => {
   try {
     const post = await Post.findByPk(req.params.id);
     if (!post) {
-      req.flash('error', 'Post not found');
-      return res.redirect('/');
+      return res.status(404).json({ error: 'Post not found' });
     }
-    
-    // Check if user owns the post or is an admin
-    if (post.authorId != req.session.user.id && req.session.user.role !== 'admin') {
-      req.flash('error', 'Unauthorized');
-      return res.redirect('/');
+
+    if (post.authorId != req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized' });
     }
-    
-    // Delete associated comments first
+
     await Comment.destroy({ where: { postId: post.id } });
-    
-    // Delete the post
     await post.destroy();
-    
-    req.flash('success', 'Post deleted successfully');
-    res.redirect('/posts');
+
+    res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     console.error('Delete error:', error);
-    req.flash('error', 'Error deleting post');
-    res.redirect('back');
+    res.status(500).json({ error: 'Error deleting post' });
   }
 };
 
@@ -127,21 +110,23 @@ exports.addComment = async (req, res) => {
   try {
     const post = await Post.findOne({ where: { slug: req.params.slug } });
     if (!post) {
-      req.flash('error', 'Post not found');
-      return res.redirect('/');
+      return res.status(404).json({ error: 'Post not found' });
     }
-    
+
     const comment = await Comment.create({
       postId: post.id,
-      authorId: req.session.user ? req.session.user.id : null,
-      authorName: req.body.name || (req.session.user ? req.session.user.username : 'Anonymous'),
+      authorId: req.user ? req.user.id : null,
+      authorName: req.body.name || (req.user ? req.user.username : 'Anonymous'),
       text: req.body.text
     });
-    req.flash('success', 'Comment added');
-    res.redirect(`/posts/${post.slug}`);
+
+    const commentWithAuthor = await Comment.findByPk(comment.id, {
+      include: [{ model: User, as: 'author', attributes: ['id', 'username'] }]
+    });
+
+    res.json({ comment: commentWithAuthor, message: 'Comment added' });
   } catch (e) {
-    req.flash('error', e.message);
-    res.redirect('back');
+    res.status(400).json({ error: e.message });
   }
 };
 
@@ -149,23 +134,18 @@ exports.deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.commentId);
     if (!comment) {
-      req.flash('error', 'Comment not found');
-      return res.redirect('back');
+      return res.status(404).json({ error: 'Comment not found' });
     }
 
-    // Allow author or admin to delete the comment
-    if (comment.authorId != req.session.user.id && req.session.user.role !== 'admin') {
-      req.flash('error', 'Unauthorized to delete this comment');
-      return res.redirect('back');
+    if (comment.authorId != req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized to delete this comment' });
     }
 
     await comment.destroy();
-    req.flash('success', 'Comment deleted');
-    res.redirect('back');
+    res.json({ message: 'Comment deleted' });
   } catch (error) {
     console.error('Error deleting comment:', error);
-    req.flash('error', 'Failed to delete comment');
-    res.redirect('back');
+    res.status(500).json({ error: 'Failed to delete comment' });
   }
 };
 
@@ -173,22 +153,22 @@ exports.likePost = async (req, res) => {
   try {
     const post = await Post.findByPk(req.params.id);
     if (!post) return res.json({ ok: false, error: 'Post not found' });
-    
-    const uid = req.session.user.id;
+
+    const uid = req.user.id;
     let likes = post.likes || [];
     const idx = likes.indexOf(uid);
-    
+
     if (idx === -1) {
       likes.push(uid);
     } else {
       likes.splice(idx, 1);
     }
-    
+
     post.likes = likes;
-    post.changed('likes', true); // tell Sequelize the JSON changed
-    
+    post.changed('likes', true);
+
     await post.save();
-    res.json({ ok: true, likes: post.likes.length });
+    res.json({ ok: true, likes: post.likes.length, likedByUser: likes.includes(uid) });
   } catch (error) {
     res.json({ ok: false, error: 'Server error' });
   }

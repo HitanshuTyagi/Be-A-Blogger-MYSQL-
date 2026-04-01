@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const postsController = require('../controllers/postsController');
+const { requireLogin, optionalAuth } = require('../middleware/authMiddleware');
 
 // Multer setup
 const storage = multer.diskStorage({
@@ -15,22 +16,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// helper to check auth
-function requireLogin(req, res, next){
-  if (!req.session.user) {
-    req.flash('error', 'You must be logged in');
-    return res.redirect('/auth/login');
-  }
-  next();
-}
-
-router.get('/new', requireLogin, postsController.renderNew);
 router.post('/', requireLogin, upload.single('image'), postsController.createPost);
 router.get('/:slug', postsController.showPost);
-router.get('/:id/edit', requireLogin, postsController.renderEdit);
+router.get('/:id/edit', requireLogin, postsController.getPostForEdit);
 router.put('/:id', requireLogin, upload.single('image'), postsController.updatePost);
 router.delete('/:id', requireLogin, postsController.deletePost);
-router.post('/:slug/comments', postsController.addComment);
+router.post('/:slug/comments', optionalAuth, postsController.addComment);
 router.delete('/:slug/comments/:commentId', requireLogin, postsController.deleteComment);
 router.post('/:id/like', requireLogin, postsController.likePost);
 

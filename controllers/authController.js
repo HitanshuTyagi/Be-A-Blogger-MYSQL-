@@ -1,41 +1,48 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-exports.renderRegister = (req, res) => res.render('auth/register');
+function signToken(user) {
+  return jwt.sign(
+    { id: user.id, username: user.username, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+}
 
 exports.submitRegister = async (req, res) => {
   const { username, email, password } = req.body;
   try {
     const user = User.build({ username, email, password });
     await user.save();
-    req.session.user = { id: user.id, username: user.username, role: user.role };
-    req.flash('success', 'Registered and logged in');
-    res.redirect('/');
+    const token = signToken(user);
+    res.json({ token, user: { id: user.id, username: user.username, role: user.role }, message: 'Registered and logged in' });
   } catch (e) {
-    req.flash('error', 'Error: ' + e.message);
-    res.redirect('/auth/register');
+    res.status(400).json({ error: e.message });
   }
 };
-
-exports.renderLogin = (req, res) => res.render('auth/login');
 
 exports.submitLogin = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ where: { email } });
   if (!user) {
-    req.flash('error', 'Invalid credentials');
-    return res.redirect('/auth/login');
+    return res.status(401).json({ error: 'Invalid credentials' });
   }
   const ok = await user.comparePassword(password);
   if (!ok) {
-    req.flash('error', 'Invalid credentials');
-    return res.redirect('/auth/login');
+    return res.status(401).json({ error: 'Invalid credentials' });
   }
-  req.session.user = { id: user.id, username: user.username, role: user.role };
-  req.flash('success', 'Logged in');
-  res.redirect('/');
+  const token = signToken(user);
+  res.json({ token, user: { id: user.id, username: user.username, role: user.role }, message: 'Logged in' });
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy();
-  res.redirect('/');
+  res.json({ message: 'Logged out' });
+};
+
+exports.getMe = (req, res) => {
+  if (req.user) {
+    res.json({ user: req.user });
+  } else {
+    res.json({ user: null });
+  }
 };

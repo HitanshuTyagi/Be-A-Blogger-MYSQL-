@@ -1,13 +1,10 @@
+const { requireLogin } = require('./authMiddleware');
+
 module.exports = function requireAdmin(req, res, next) {
-  if (!req.session.user) {
-    req.flash('error', 'You must be logged in');
-    return res.redirect('/auth/login');
-  }
-  
-  if (req.session.user.role !== 'admin') {
-    req.flash('error', 'Access denied. Admins only.');
-    return res.redirect('/');
-  }
-  
-  next();
+  requireLogin(req, res, () => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    }
+    next();
+  });
 };

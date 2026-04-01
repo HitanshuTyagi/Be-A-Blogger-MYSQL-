@@ -1,20 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const { optionalAuth } = require('../middleware/authMiddleware');
 
-// Register form
-router.get('/register', authController.renderRegister);
-
-// Register submit
 router.post('/register', authController.submitRegister);
-
-// Login form
-router.get('/login', authController.renderLogin);
-
-// Login submit
 router.post('/login', authController.submitLogin);
-
-// Logout
 router.post('/logout', authController.logout);
+router.get('/me', optionalAuth, authController.getMe);
 
 module.exports = router;

@@ -7,58 +7,60 @@ exports.getDashboard = async (req, res) => {
     const totalUsers = await User.count();
     const totalPosts = await Post.count();
     const totalComments = await Comment.count();
-
-    res.render('admin/dashboard', {
-      totalUsers,
-      totalPosts,
-      totalComments
-    });
+    res.json({ totalUsers, totalPosts, totalComments });
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Failed to load dashboard data');
-    res.redirect('/');
+    res.status(500).json({ error: 'Failed to load dashboard data' });
   }
 };
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.findAll({ order: [['createdAt', 'DESC']] });
-    res.render('admin/users', { users });
+    const users = await User.findAll({
+      attributes: ['id', 'username', 'email', 'role', 'createdAt'],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ users });
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Failed to load users');
-    res.redirect('/admin');
+    res.status(500).json({ error: 'Failed to load users' });
   }
 };
 
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    
-    // Prevent admin from deleting themselves
-    if (userId == req.session.user.id) {
-        req.flash('error', 'You cannot delete yourself.');
-        return res.redirect('/admin/users');
+
+    if (userId == req.user.id) {
+      return res.status(400).json({ error: 'You cannot delete yourself.' });
     }
 
     const user = await User.findByPk(userId);
     if (!user) {
-      req.flash('error', 'User not found');
-      return res.redirect('/admin/users');
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Deleting a user should ideally delete their posts and comments too (Cascade delete). 
-    // Assuming Sequelize associations handle this, otherwise manual deletion is needed.
     await Post.destroy({ where: { authorId: userId } });
     await Comment.destroy({ where: { authorId: userId } });
     await user.destroy();
 
-    req.flash('success', 'User deleted successfully');
-    res.redirect('/admin/users');
+    res.json({ message: 'User deleted successfully' });
   } catch (err) {
     console.error('Error deleting user:', err);
-    req.flash('error', 'Failed to delete user');
-    res.redirect('/admin/users');
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+};
+
+exports.getPosts = async (req, res) => {
+  try {
+    const posts = await Post.findAll({
+      include: [{ model: User, as: 'author', attributes: ['id', 'username'] }],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json({ posts });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load posts' });
   }
 };
 
@@ -66,20 +68,17 @@ exports.makeAdmin = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findByPk(userId);
-    
+
     if (!user) {
-      req.flash('error', 'User not found');
-      return res.redirect('/admin/users');
+      return res.status(404).json({ error: 'User not found' });
     }
 
     user.role = 'admin';
     await user.save();
 
-    req.flash('success', `${user.username} is now an admin.`);
-    res.redirect('/admin/users');
+    res.json({ message: `${user.username} is now an admin.` });
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Failed to promote user');
-    res.redirect('/admin/users');
+    res.status(500).json({ error: 'Failed to promote user' });
   }
 };

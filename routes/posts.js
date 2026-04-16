@@ -1,20 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const postsController = require('../controllers/postsController');
 const { requireLogin, optionalAuth } = require('../middleware/authMiddleware');
+const { postStorage } = require('../config/cloudinary');
 
-// Multer setup
-const storage = multer.diskStorage({
-  destination: function(req, file, cb){
-    cb(null, path.join(__dirname, '..', 'public', 'uploads'));
-  },
-  filename: function(req, file, cb){
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-const upload = multer({ storage });
+const upload = multer({ storage: postStorage });
 
 router.post('/', requireLogin, upload.single('image'), postsController.createPost);
 router.get('/:slug', postsController.showPost);

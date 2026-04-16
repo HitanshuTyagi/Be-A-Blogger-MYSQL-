@@ -12,7 +12,7 @@ exports.createPost = async (req, res) => {
       authorId: req.user.id,
       tags: tags ? tags.split(',').map(t => t.trim()) : [],
       category,
-      image: req.file ? '/uploads/' + req.file.filename : null
+      image: req.file ? req.file.path : null
     });
     await post.save();
     res.json({ post, message: 'Post created' });
@@ -73,7 +73,7 @@ exports.updatePost = async (req, res) => {
     post.category = category;
 
     if (req.file) {
-      post.image = '/uploads/' + req.file.filename;
+      post.image = req.file.path;
     } else if (removeImage === 'true') {
       post.image = null;
     }

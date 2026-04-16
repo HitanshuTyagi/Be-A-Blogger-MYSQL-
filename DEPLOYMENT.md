@@ -79,6 +79,9 @@ Render does NOT provide MySQL. Use one of these:
 | `EMAIL_USER` | your Gmail address |
 | `EMAIL_PASS` | Gmail App Password (generate at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)) |
 | `EMAIL_TO` | your Gmail address |
+| `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | your Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | your Cloudinary API secret |
 
 > For `CLIENT_URL`, put `https://temp-will-update-later.vercel.app` for now. We'll fix it in Step 5.
 
@@ -166,16 +169,14 @@ node seedAdmin.js
 
 ---
 
-# ⚠️ Known Limitation: File Uploads
+# ✅ File Uploads — Cloudinary
 
-Render's filesystem is **ephemeral** — uploaded images in `/uploads` are **deleted on every deploy/restart**.
+Images are stored on **Cloudinary** (cloud storage), so they persist across deploys and restarts. No more ephemeral filesystem issues.
 
-For production, switch to cloud storage:
-- **Cloudinary** (recommended, free tier)
-- **AWS S3**
-- **Uploadthing**
-
-Works fine for testing/demo.
+To get your Cloudinary credentials:
+1. Sign up at [cloudinary.com](https://cloudinary.com) (free tier: 25GB storage, 25GB bandwidth/month)
+2. Go to **Dashboard** → copy `Cloud Name`, `API Key`, `API Secret`
+3. Add them as environment variables on Render
 
 ---
 
@@ -209,6 +210,9 @@ CLIENT_URL=https://your-vercel-app.vercel.app
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-gmail-app-password
 EMAIL_TO=your-email@gmail.com
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 ### Frontend — Vercel Environment Variables
@@ -228,4 +232,7 @@ CLIENT_URL=http://localhost:5173
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
 EMAIL_TO=your-email@gmail.com
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```

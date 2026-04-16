@@ -12,7 +12,7 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   const user = await User.findByPk(req.user.id);
   user.bio = req.body.bio || user.bio;
-  if (req.file) user.profileImage = '/uploads/' + req.file.filename;
+  if (req.file) user.profileImage = req.file.path;
   await user.save();
   res.json({ message: 'Profile updated', user: { id: user.id, username: user.username, bio: user.bio, profileImage: user.profileImage } });
 };

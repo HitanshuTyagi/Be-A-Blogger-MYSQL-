@@ -3,12 +3,31 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const sequelize = require('./config/database');
+const User = require('./models/User');
 
 const app = express();
 
 // ======================
 sequelize.sync({ alter: true })
-  .then(() => console.log('✅ MySQL connected via Sequelize'))
+  .then(() => {
+    console.log('✅ MySQL connected via Sequelize');
+    // Auto-seed admin user
+    return User.findOne({ where: { email: 'admin@blog.com' } });
+  })
+  .then(existing => {
+    if (!existing) {
+      const admin = User.build({ username: 'Admin', email: 'admin@blog.com', password: 'adminpassword', role: 'admin' });
+      return admin.save();
+    }
+    if (existing.role !== 'admin') {
+      existing.role = 'admin';
+      return existing.save();
+    }
+    return null;
+  })
+  .then(result => {
+    if (result) console.log('✅ Default Admin seeded (admin@blog.com / adminpassword)');
+  })
   .catch(err => console.error('❌ Sequelize connection error:', err));
 
 // ======================

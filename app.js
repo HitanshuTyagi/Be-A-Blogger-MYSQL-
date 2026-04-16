@@ -14,8 +14,9 @@ sequelize.sync({ alter: true })
 // ======================
 // Middleware
 // ======================
+const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: clientUrl,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

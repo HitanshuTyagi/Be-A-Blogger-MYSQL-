@@ -24,3 +24,6 @@ Thumbs.db
 
 # Build output
 client/dist/
+
+
+/DEPLOYMENT.md

@@ -8,7 +8,7 @@ const User = require('./models/User');
 const app = express();
 
 // ======================
-sequelize.sync({ alter: true })
+sequelize.sync()
   .then(() => {
     console.log('✅ MySQL connected via Sequelize');
     // Auto-seed admin user
